@@ -7,6 +7,7 @@ import { UserModule } from './core/user/user.module';
 import { AuthModule } from './auth/auth.module';
 import * as Joi from 'joi';
 import { WorkplaceModule } from './core/workplace/workplace.module';
+import { SeederModule } from './seeders/seeder.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { WorkplaceModule } from './core/workplace/workplace.module';
     UserModule,
     WorkplaceModule,
     AuthModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService],
