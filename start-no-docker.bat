@@ -23,15 +23,17 @@ if not exist ".env" (
         copy .env.local .env >nul
         echo ✅ Environment file created from .env.local
     ) else (
-        echo # Local Development Configuration > .env
-        echo DB_URL=mongodb://localhost:27017/employee-app >> .env
-        echo JWT_SECRET=your-super-secret-jwt-key-dev >> .env
-        echo JWT_EXPIRES_IN=1d >> .env
-        echo RANDOM_TEXT=your-encryption-seed-dev >> .env
-        echo NODE_ENV=development >> .env
-        echo PORT_API_HTTP=3000 >> .env
-        echo # Redis configuration - comment out if not using Redis >> .env
-        echo # REDIS_URL=redis://localhost:6379 >> .env
+        (
+            echo # Local Development Configuration
+            echo DB_URL=mongodb://localhost:27017/employee-app
+            echo JWT_SECRET=your-super-secret-jwt-key-dev
+            echo JWT_EXPIRES_IN=1d
+            echo RANDOM_TEXT=your-encryption-seed-dev
+            echo NODE_ENV=development
+            echo PORT_API_HTTP=3000
+            echo # Redis configuration - comment out if not using Redis
+            echo # REDIS_URL=redis://localhost:6379
+        ) > .env
         echo ✅ Basic environment file created
     )
 )
