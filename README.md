@@ -1,6 +1,6 @@
 # NestJS Employee App Boilerplate
 
-A comprehensive NestJS boilerplate application with authentication, user management, workplace management, and mailing capabilities. This template provides a solid foundation for building enterprise-grade applications.
+A clean, production-ready NestJS boilerplate featuring authentication, user management, workplace management, and mailing capabilities. Perfect starting point for enterprise applications.
 
 ## 🚀 Features
 
@@ -13,11 +13,10 @@ A comprehensive NestJS boilerplate application with authentication, user managem
 - **Encryption**: Built-in encryption/decryption utilities
 - **Activity Logging**: User activity tracking
 - **Password Management**: Secure password reset functionality
-- **ESLint Configuration**: Pre-configured ESLint with warnings instead of errors
 
 ## 🛠️ Tech Stack
 
-- **Framework**: NestJS (Node.js)
+- **Framework**: NestJS (Node.js v22+)
 - **Database**: MongoDB with Mongoose
 - **Authentication**: JWT, Passport
 - **Caching**: Redis
@@ -30,186 +29,138 @@ A comprehensive NestJS boilerplate application with authentication, user managem
 
 ## 📋 Prerequisites
 
-- Node.js (v18 or higher)
-- MongoDB
-- Redis
-- Azure account (for email and storage services)
+- Node.js (v22 or higher)
+- Docker Desktop (for easy local development)
+- Azure account (optional, for email and storage services)
 
 ## ⚡ Quick Start
 
-### 1. Clone this boilerplate
+### Easy Setup with Docker (Recommended)
 ```bash
-git clone https://github.com/your-username/nest-boilerplate-ea.git
+# Clone the repository
+git clone https://github.com/erwinantonius/nest-boilerplate-ea.git
 cd nest-boilerplate-ea
+
+# Start everything with one command
+start-local.bat    # Windows
+./start-local.sh   # macOS/Linux
 ```
 
-### 2. Install dependencies
+This will:
+- Check Node.js version (requires v22+)
+- Start MongoDB and Redis with Docker
+- Install dependencies
+- Start the NestJS application
+
+### Manual Setup
 ```bash
+# 1. Install dependencies
 npm install
-```
 
-### 3. Environment Setup
-Copy `.env.example` to `.env` and configure your environment variables:
-```env
-# Database
-DATABASE_URL=mongodb://localhost:27017/your-app-name
+# 2. Start database services
+docker-compose -f docker-compose.dev.yml up -d
 
-# JWT
-JWT_SECRET=your-jwt-secret-key
-JWT_EXPIRES_IN=1d
-
-# Redis Cache
-AZURE_CACHE_FOR_REDIS_HOST_NAME=your-redis-host
-AZURE_CACHE_FOR_REDIS_ACCESS_KEY=your-redis-key
-
-# Encryption
-RANDOM_TEXT=your-encryption-key
-
-# Azure Communication Services
-AZURE_COMMUNICATION_CONNECTION_STRING=your-azure-communication-string
-
-# Azure Storage
-AZURE_STORAGE_CONNECTION_STRING=your-azure-storage-string
-```
-
-### 4. Run the application
-
-#### Development mode
-```bash
+# 3. Start the application
 npm run start:dev
 ```
 
-#### Production mode
+## 📝 Environment Configuration
+
+The `.env` file is pre-configured for local development:
+
+```env
+# Database (local MongoDB running on port 27018 via Docker)
+DB_URL=mongodb://localhost:27018/your-app-name
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this
+JWT_EXPIRES_IN=1d
+
+# Redis (optional, running on port 6380 via Docker)
+REDIS_URL=redis://localhost:6380
+
+# Application
+CLIENT_URL=localhost:9000
+PORT_API_HTTP=3000
+
+# Azure Services (optional)
+AZURE_MAIL_SENDER=your-sender@email.com
+AZURE_MAIL_CONNSTRING=your-connection-string
+```
+
+**For production, update these values with your actual credentials.**
+
+## 🌐 Access Points
+
+Once running:
+- **API**: http://localhost:3000
+- **Swagger Documentation**: http://localhost:3000/api
+- **MongoDB Admin**: http://localhost:8081 (admin/admin123)
+- **Redis Admin**: http://localhost:8082
+
+## 🧪 Development Commands
+
 ```bash
-npm run build
-npm run start:prod
+# Development
+npm run start:dev        # Start with hot reload
+npm run start:debug      # Start in debug mode
+
+# Testing
+npm run test            # Unit tests
+npm run test:e2e        # E2E tests
+npm run test:cov        # Test coverage
+
+# Code Quality
+npm run lint            # ESLint check and fix
+npm run format          # Prettier formatting
+npm run build           # Build for production
 ```
 
-## 📚 API Documentation
+## 🐳 Docker Support
 
-Once the application is running, visit:
-- Swagger UI: `http://localhost:3000/api`
-- API JSON: `http://localhost:3000/api-json`
-
-## 🏗️ Project Structure
-
-```
-src/
-├── auth/                 # Authentication module
-│   ├── dto/             # Data Transfer Objects
-│   ├── guards/          # Auth guards
-│   └── decorators/      # Custom decorators
-├── common/              # Shared utilities
-│   ├── entities/        # Base entities
-│   ├── interceptors/    # HTTP interceptors
-│   ├── middleware/      # Custom middleware
-│   ├── validators/      # Custom validators
-│   └── enum/           # Enumerations
-├── core/
-│   ├── user/           # User management
-│   └── workplace/      # Workplace management
-├── mailing/            # Email services
-└── main.ts            # Application entry point
-```
-
-## 🧪 Testing
-
+### Development (MongoDB + Redis only)
 ```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Test coverage
-npm run test:cov
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
-## 🔧 Scripts
+### Production (Full stack)
+```bash
+docker-compose up -d
+```
 
-- `npm run start` - Start the application
-- `npm run start:dev` - Start in development mode with watch
-- `npm run start:debug` - Start in debug mode
-- `npm run build` - Build the application
-- `npm run lint` - Run ESLint with auto-fix (warnings only)
-- `npm run lint:check` - Check ESLint issues without fixing
-- `npm run format` - Format code with Prettier
+**Custom Ports (to avoid conflicts):**
+- MongoDB: 27018 (not 27017)
+- Redis: 6380 (not 6379)
 
 ## 🔐 Authentication
 
-The application uses JWT tokens for authentication. Include the token in the Authorization header:
-
+Include JWT token in requests:
 ```
 Authorization: Bearer <your-jwt-token>
 ```
 
-## 🌟 What's Included
+## 🚀 Production Deployment
 
-### Pre-configured Modules
-- **Auth Module**: Complete authentication system
-- **User Module**: User management with RBAC
-- **Workplace Module**: Multi-tenant workplace support
-- **Common Module**: Shared utilities and services
-- **Mailing Module**: Email system integration
-
-### Development Tools
-- **ESLint**: Pre-configured with warning-only mode
-- **Prettier**: Code formatting
-- **Docker**: Ready-to-use containers
-- **Docker Compose**: Local development environment
-
-## 🚀 Deployment
-
-### Using Docker
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-
-# Or build and run manually
-docker build -t your-app-name .
-docker run -p 3000:3000 your-app-name
+Update `.env` for production:
+```env
+NODE_ENV=production
+DB_URL=mongodb+srv://user:pass@cluster.mongodb.net/your-database
+REDIS_URL=redis://your-redis-host:6379
+JWT_SECRET=your-super-secure-secret
+AZURE_MAIL_CONNSTRING=your-production-connection-string
 ```
 
-### Environment Variables for Production
-Ensure all environment variables are properly set in your production environment.
+## 🛠️ Troubleshooting
 
-## 📝 Customization
+**MongoDB Connection Issues:**
+- Ensure Docker is running
+- Check port 27018 availability
+- Restart: `docker-compose -f docker-compose.dev.yml restart`
 
-This boilerplate is designed to be easily customizable:
-
-1. **Rename the project**: Update `package.json` and other references
-2. **Modify entities**: Adapt the user and workplace entities to your needs
-3. **Add new modules**: Use the existing structure as a template
-4. **Configure authentication**: Modify JWT settings and add OAuth if needed
-5. **Update database**: Switch to PostgreSQL or other databases if required
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+**Node.js Version:**
+- Requires v22+
+- Use nvm: `nvm install 22 && nvm use 22`
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Support
-
-If you have any questions or need help getting started:
-
-1. Check the [documentation](https://docs.nestjs.com)
-2. Open an issue on GitHub
-3. Join the NestJS Discord community
-
-## 🙏 Acknowledgments
-
-- NestJS team for the amazing framework
-- MongoDB team for the database
-- Redis team for caching solution
-- Azure team for cloud services
-
----
-
-**Happy coding! 🎉**
+MIT License - see [LICENSE](LICENSE) file for details.

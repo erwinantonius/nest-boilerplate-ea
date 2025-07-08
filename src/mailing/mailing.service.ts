@@ -11,6 +11,7 @@ export class MailingService {
 
   constructor(private configService: ConfigService) {
     const connectionString =
+      this.configService.get<string>('AZURE_COMMUNICATION_CONNECTION_STRING') ||
       this.configService.get<string>('AZURE_MAIL_CONNSTRING') || '';
     this.emailClient = new EmailClient(connectionString);
   }
@@ -33,7 +34,7 @@ export class MailingService {
   mailUserInvitation(data: Record<string, any>) {
     const htmlContent = this.renderTemplate('emails/user-invitation', {
       ...data,
-      ski_url: process.env.CLIENT_URL,
+      ski_url: this.configService.get<string>('CLIENT_URL'),
     });
 
     const message: EmailDto = {

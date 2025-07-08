@@ -14,19 +14,27 @@ import { WorkplaceModule } from './core/workplace/workplace.module';
       isGlobal: true,
       validationSchema: Joi.object({
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRED: Joi.string().required(),
-        DB_URL: Joi.string().required(),
-        NODE_ENV: Joi.string().required(),
-        AZURE_MAIL_SENDER: Joi.string().required(),
-        AZURE_MAIL_CONNSTRING: Joi.string().required(),
-        CLIENT_URL: Joi.string().required(),
-        PORT_API_HTTP: Joi.string().required(),
+        JWT_EXPIRES_IN: Joi.string().default('1d'),
+        JWT_EXPIRED: Joi.string().optional(), // Keep for backward compatibility
+        DB_URL: Joi.string().required(), // Database URL for both local and cloud
+        NODE_ENV: Joi.string().default('development'),
+        RANDOM_TEXT: Joi.string().optional(),
+        REDIS_URL: Joi.string().optional(),
+        AZURE_CACHE_FOR_REDIS_HOST_NAME: Joi.string().optional(),
+        AZURE_CACHE_FOR_REDIS_ACCESS_KEY: Joi.string().optional(),
+        AZURE_MAIL_SENDER: Joi.string().optional(),
+        AZURE_MAIL_CONNSTRING: Joi.string().optional(),
+        AZURE_COMMUNICATION_CONNECTION_STRING: Joi.string().optional(),
+        AZURE_BLOB_TOKEN: Joi.string().optional(),
+        CLIENT_URL: Joi.string().default('localhost:9000'),
+        PORT_API_HTTP: Joi.string().default('3000'),
       }),
     }),
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>('DB_URL');
         return {
-          uri: configService.get<string>('DB_URL') as string,
+          uri: uri as string,
         };
       },
       inject: [ConfigService],

@@ -82,7 +82,36 @@ export class CommonService {
   }
 
   private async getCacheConnection() {
-    // Environment variables for cache
+    // Check for Redis URL first (for local development)
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    
+    if (redisUrl) {
+      try {
+        const cacheConnection = createClient({
+          url: redisUrl
+        });
+        
+        cacheConnection.on('error', (err) => {
+          Logger.warn(`Redis connection error: ${err.message}`);
+          if (this.retryCacheConnection > 5) {
+            throw err;
+          }
+          this.retryCacheConnection++;
+        });
+        
+        cacheConnection.on('ready', () => {
+          this.retryCacheConnection = 0;
+        });
+        
+        await cacheConnection.connect();
+        return cacheConnection;
+      } catch (err) {
+        Logger.warn(`Redis connection failed with URL: ${err.message}`);
+        throw err;
+      }
+    }
+
+    // Fallback to Azure Cache configuration
     const cacheHostName = this.configService.get<string>(
       'AZURE_CACHE_FOR_REDIS_HOST_NAME',
     );
@@ -90,30 +119,37 @@ export class CommonService {
       'AZURE_CACHE_FOR_REDIS_ACCESS_KEY',
     );
 
-    if (!cacheHostName) throw Error('AZURE_CACHE_FOR_REDIS_HOST_NAME is empty');
-    if (!cachePassword)
-      throw Error('AZURE_CACHE_FOR_REDIS_ACCESS_KEY is empty');
+    if (!cacheHostName && !redisUrl) {
+      throw new Error('No Redis configuration found. Set REDIS_URL or Azure Redis credentials.');
+    }
+
+    if (!cachePassword && cacheHostName) {
+      throw new Error('AZURE_CACHE_FOR_REDIS_ACCESS_KEY is required when using Azure Redis');
+    }
 
     try {
-      // Connection configuration
+      // Connection configuration for Azure
       const cacheConnection = createClient({
-        // rediss for toFileStream
         url: `rediss://${cacheHostName}:6380`,
         password: cachePassword,
       });
+      
       cacheConnection.on('error', (err) => {
+        Logger.warn(`Azure Redis connection error: ${err.message}`);
         if (this.retryCacheConnection > 5) {
           throw err;
         }
         this.retryCacheConnection++;
       });
+      
       cacheConnection.on('ready', () => {
         this.retryCacheConnection = 0;
       });
+      
       await cacheConnection.connect();
       return cacheConnection;
     } catch (err) {
-      Logger.error(`Redis error ${err}`);
+      Logger.error(`Azure Redis connection failed: ${err.message}`);
       throw err;
     }
   }
@@ -121,8 +157,11 @@ export class CommonService {
   async testCache() {
     try {
       const cacheConnection = await this.getCacheConnection();
-      return await cacheConnection.ping();
+      const result = await cacheConnection.ping();
+      await cacheConnection.quit();
+      return result;
     } catch (err) {
+      Logger.warn('Cache connection failed, continuing without cache');
       return null;
     }
   }
@@ -130,18 +169,24 @@ export class CommonService {
   async getCache(key: string) {
     try {
       const cacheConnection = await this.getCacheConnection();
-      return await cacheConnection.get(key);
+      const result = await cacheConnection.get(key);
+      await cacheConnection.quit();
+      return result;
     } catch (err) {
-      throw err;
+      Logger.warn(`Cache get failed for key ${key}, returning null`);
+      return null;
     }
   }
 
   async setCache(key: string, value: any) {
     try {
       const cacheConnection = await this.getCacheConnection();
-      return await cacheConnection.set(key, JSON.stringify(value));
+      const result = await cacheConnection.set(key, JSON.stringify(value));
+      await cacheConnection.quit();
+      return result;
     } catch (err) {
-      throw err;
+      Logger.warn(`Cache set failed for key ${key}, continuing without cache`);
+      return null;
     }
   }
 

@@ -7,7 +7,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mongodb://mongo:27017/employee-app
+      - DB_URL=mongodb://mongo:27017/employee-app
       - REDIS_URL=redis://redis:6379
     depends_on:
       - mongo
@@ -19,7 +19,7 @@ services:
   mongo:
     image: mongo:7
     ports:
-      - "27017:27017"
+      - "27018:27017"  # Changed from 27017 to 27018
     volumes:
       - mongo_data:/data/db
     environment:
@@ -28,7 +28,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"  # Changed from 6379 to 6380
     volumes:
       - redis_data:/data
 

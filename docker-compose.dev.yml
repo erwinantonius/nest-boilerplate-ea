@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Only MongoDB and Redis for local development
+  mongo:
+    image: mongo:7
+    container_name: nestjs-mongo-dev
+    ports:
+      - "27018:27017"  # Use port 27018 to avoid conflicts
+    volumes:
+      - mongo_dev_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=employee-app
+    networks:
+      - nestjs-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nestjs-redis-dev
+    ports:
+      - "6380:6379"  # Use port 6380 to avoid conflicts
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - nestjs-network
+
+  # MongoDB Admin UI (optional)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: nestjs-mongo-admin
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo
+    networks:
+      - nestjs-network
+
+  # Redis Admin UI (optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: nestjs-redis-admin
+    ports:
+      - "8082:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - nestjs-network
+
+networks:
+  nestjs-network:
+    driver: bridge
+
+volumes:
+  mongo_dev_data:
+  redis_dev_data:

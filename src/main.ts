@@ -9,6 +9,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as bodyParser from 'body-parser';
 import * as hbs from 'hbs';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   //use http to local test redirect url
@@ -19,12 +20,12 @@ async function bootstrap() {
   // };
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
-    logger:
-      process.env.NODE_ENV === 'development'
-        ? ['log', 'error', 'warn', 'debug', 'verbose']
-        : ['error', 'warn'],
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
     //httpsOptions, //use http to local test redirect url
   });
+
+  // Get ConfigService to access environment variables properly
+  const configService = app.get(ConfigService);
 
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new LoggingInterceptor());
@@ -58,7 +59,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT_API_HTTP, async () => {
+  const port = configService.get<string>('PORT_API_HTTP') || '3000';
+  await app.listen(port, async () => {
     console.log(`App Up.. running on:${await app.getUrl()}`);
   });
 }
